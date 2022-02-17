@@ -6,49 +6,45 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class Main {
-    private static String sortKey = "-a";
-    private static String typeKey;
-    private static String outputFileName;
-    private static final ArrayList<String> inputFileNames = new ArrayList<>();
-
     public static void main(String[] args) {
         try {
-            keyChecker(args);
-            switch (typeKey) {
+            final SortingArgs sortingArgs = new SortingArgs();
+            keyChecker(sortingArgs, args);
+            switch (sortingArgs.getTypeKey()) {
                 case "-i" -> {
                     IntegerSort integerSort = new IntegerSort();
-                    integerSort.mergeSort(sortKey, inputFileNames, outputFileName);
+                    integerSort.mergeSort(sortingArgs.getSortKey(), sortingArgs.getInputFileNames(), sortingArgs.getOutputFileName());
                 }
                 case "-s" -> {
                     StringSort stringSort = new StringSort();
-                    stringSort.mergeSort(sortKey, inputFileNames, outputFileName);
+                    stringSort.mergeSort(sortingArgs.getSortKey(), sortingArgs.getInputFileNames(), sortingArgs.getOutputFileName());
                 }
-                default -> throw new IllegalArgumentException("Expected -s or -i, but got " + typeKey);
+                default -> throw new IllegalArgumentException("Expected -s or -i, but got " + sortingArgs.getTypeKey());
             }
         } catch (IllegalArgumentException | IOException e) {
             System.err.println(e.getMessage());
         }
     }
 
-    private static void keyChecker(String[] args) {
+    private static void keyChecker(SortingArgs sortingArgs, String[] args) {
         if (args.length < 3) {
             throw new IllegalArgumentException("Invalid number of arguments.");
         } else {
             int argIndex = 0;
 
             if (Objects.equals(args[argIndex], "-d") || Objects.equals(args[argIndex], "-a")) {
-                sortKey = args[argIndex];
+                sortingArgs.setSortKey(args[argIndex]);
                 argIndex++;
             }
             if (Objects.equals(args[argIndex], "-i") || Objects.equals(args[argIndex], "-s")) {
-                typeKey = args[argIndex];
+                sortingArgs.setTypeKey(args[argIndex]);
                 argIndex++;
             } else {
                 throw new IllegalArgumentException("Invalid " + argIndex + " key (" + args[argIndex] + ").");
             }
-            outputFileName = args[argIndex];
+            sortingArgs.setOutputFileName(args[argIndex]);
             argIndex++;
-            inputFileNames.addAll(Arrays.asList(args).subList(argIndex, args.length));
+            sortingArgs.setInputFileNames(new ArrayList<>(Arrays.asList(args).subList(argIndex, args.length)));
         }
     }
 }

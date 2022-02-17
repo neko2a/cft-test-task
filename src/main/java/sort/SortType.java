@@ -1,6 +1,5 @@
 package sort;
 
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -8,16 +7,22 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public abstract class SortType<T> {
+public abstract class SortType<T extends Comparable<? super T>> {
     protected ArrayList<Scanner> inputFiles = new ArrayList<>();
     protected ArrayList<T> tmpList = new ArrayList<>();
     protected FileWriter outputFile;
     protected T lastWritten = null;
     protected String sortKey = "-a";
 
-    protected abstract T takeElement(int index);
+    protected abstract boolean hasNext(Scanner file);
+    protected abstract T takeNext(Scanner file);
 
-    protected abstract boolean compareByKey(T t1, T t2);
+    protected boolean compareByKey(T t1, T t2){
+        if (sortKey.equals("-d")) {
+            return t1.compareTo(t2) >= 0;
+        }
+        return t1.compareTo(t2) <= 0;
+    }
 
     protected int getIndexByKey(ArrayList<T> list) {
         int index = 0;
@@ -32,6 +37,19 @@ public abstract class SortType<T> {
         return index;
     }
 
+    protected T takeElement(int index) {
+        if (hasNext(inputFiles.get(index))) {
+            T element = takeNext(inputFiles.get(index));
+
+            if (lastWritten != null) {
+                while (element != null && !compareByKey(lastWritten, element)) {
+                    element = takeElement(index);
+                }
+            }
+            return element;
+        }
+        return null;
+    }
 
     public void mergeSort(String key, ArrayList<String> inputFileNames, String outputFileName) throws IOException {
         sortKey = key;
